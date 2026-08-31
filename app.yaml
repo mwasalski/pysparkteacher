@@ -2,9 +2,3 @@ command:
   - streamlit
   - run
   - app.py
-
-env:
-  # Gdy endpoint jest podpięty jako resource aplikacji (patrz databricks.yml), zamień na:
-  #   valueFrom: serving-endpoint
-  - name: SERVING_ENDPOINT
-    value: databricks-qwen35-122b-a10b

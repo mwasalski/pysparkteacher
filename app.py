@@ -2,17 +2,9 @@
 
 from __future__ import annotations
 
-import os
-
 import streamlit as st
 
-from translator import (
-    DEFAULT_MAX_TOKENS,
-    DEFAULT_MODEL,
-    TranslationError,
-    strip_code_fences,
-    stream_translation,
-)
+from translator import DEFAULT_MAX_TOKENS, DEFAULT_MODEL, translate_sql_to_pyspark
 
 EXAMPLE_QUERY = """SELECT
     c.country,
@@ -33,14 +25,11 @@ st.caption("Wklej zapytanie Spark SQL, dostaniesz idiomatyczny odpowiednik w Dat
 
 with st.sidebar:
     st.subheader("Ustawienia")
-    model = st.text_input("Serving endpoint", value=DEFAULT_MODEL)
+    model = st.text_input("Model", value=DEFAULT_MODEL)
     temperature = st.slider("Temperature", 0.0, 1.0, 0.0, 0.1)
     max_tokens = st.number_input(
         "Max tokens", min_value=256, max_value=32_000, value=DEFAULT_MAX_TOKENS, step=256
     )
-    # Handy when someone reports "it says access denied" - tells you which principal is calling.
-    st.divider()
-    st.caption(f"Klient: `{os.environ.get('DATABRICKS_CLIENT_ID', 'local profile')}`")
 
 left, right = st.columns(2)
 
@@ -51,28 +40,22 @@ with left:
 
 with right:
     st.markdown("**PySpark**")
-    output = st.empty()
 
-    if go:
-        if not query.strip():
-            st.warning("Wpisz zapytanie.")
-        else:
-            buffer = ""
-            try:
-                with st.spinner("Model pracuje..."):
-                    for delta in stream_translation(
-                        query,
-                        note or None,
-                        model=model,
-                        max_tokens=int(max_tokens),
-                        temperature=temperature,
-                    ):
-                        buffer += delta
-                        output.code(strip_code_fences(buffer), language="python")
-                st.session_state["last_code"] = strip_code_fences(buffer)
-            except TranslationError as exc:
-                st.error(f"Tłumaczenie się nie udało: {exc}")
-            except Exception as exc:  # surface endpoint/permission errors instead of a blank page
-                st.error(f"{type(exc).__name__}: {exc}")
-    elif "last_code" in st.session_state:
-        output.code(st.session_state["last_code"], language="python")
+    if go and query.strip():
+        try:
+            with st.spinner("Model pracuje..."):
+                st.session_state["code"] = translate_sql_to_pyspark(
+                    query,
+                    note or None,
+                    model=model,
+                    max_tokens=int(max_tokens),
+                    temperature=temperature,
+                )
+        except Exception as exc:  # show the real error instead of a blank page
+            st.session_state.pop("code", None)
+            st.error(f"{type(exc).__name__}: {exc}")
+    elif go:
+        st.warning("Wpisz zapytanie.")
+
+    if "code" in st.session_state:
+        st.code(st.session_state["code"], language="python")
