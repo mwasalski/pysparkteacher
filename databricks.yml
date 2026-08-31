@@ -1,0 +1,22 @@
+bundle:
+  name: pysparkteacher
+
+resources:
+  apps:
+    pyspark_teacher:
+      name: pyspark-teacher
+      description: Spark SQL -> PySpark DataFrame API translator
+      source_code_path: .
+      resources:
+        # To nadaje service principalowi aplikacji prawo do odpytywania endpointu -
+        # bez tego app wstaje, ale każde tłumaczenie kończy się 403.
+        - name: serving-endpoint
+          description: LLM endpoint used for translation
+          serving_endpoint:
+            name: system.ai.qwen35-122b-a10b
+            permission: CAN_QUERY
+
+targets:
+  dev:
+    mode: development
+    default: true
