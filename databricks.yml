@@ -13,7 +13,7 @@ resources:
         - name: serving-endpoint
           description: LLM endpoint used for translation
           serving_endpoint:
-            name: system.ai.qwen35-122b-a10b
+            name: databricks-qwen35-122b-a10b
             permission: CAN_QUERY
 
 targets:

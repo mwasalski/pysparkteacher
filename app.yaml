@@ -7,4 +7,4 @@ env:
   # Gdy endpoint jest podpięty jako resource aplikacji (patrz databricks.yml), zamień na:
   #   valueFrom: serving-endpoint
   - name: SERVING_ENDPOINT
-    value: system.ai.qwen35-122b-a10b
+    value: databricks-qwen35-122b-a10b

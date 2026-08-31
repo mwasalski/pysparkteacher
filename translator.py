@@ -21,8 +21,9 @@ from openai import (
 
 logger = logging.getLogger(__name__)
 
+# The serving-endpoint name, not the UC model path (`system.ai.*` gives ENDPOINT_NOT_FOUND here).
 # In a Databricks App this comes from app.yaml; locally it falls back to the default.
-DEFAULT_MODEL = os.environ.get("SERVING_ENDPOINT", "system.ai.qwen35-122b-a10b")
+DEFAULT_MODEL = os.environ.get("SERVING_ENDPOINT", "databricks-qwen35-122b-a10b")
 DEFAULT_MAX_TOKENS = 16_000
 # Transient failures worth retrying; BadRequest/AuthError are not - retrying just burns time.
 RETRYABLE_ERRORS = (RateLimitError, APITimeoutError, APIConnectionError, InternalServerError)
